@@ -1,26 +1,27 @@
-name: Covenant Code Daily Update
+name: Covenant Code Daily Update + Slack + JSON Log
 
 on:
-  workflow_dispatch:  # Allows manual triggering from the GitHub Actions tab
-  # To schedule daily at 08:00 UTC, uncomment below:
+  workflow_dispatch:  # Manual trigger
+  # Optional scheduled run:
   # schedule:
-  #   - cron: "0 8 * * *"
+  #   - cron: "0 8 * * *"  # Every day at 08:00 UTC
 
 jobs:
   generate-covenant-update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the repository
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Generate Covenant Code progress update using ChatGPT
+      - name: Generate ChatGPT content (Markdown + JSON)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          mkdir -p daily_updates
+          mkdir -p daily_updates logs
 
-          RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
+          RESPONSE_JSON=$(curl https://api.openai.com/v1/chat/completions \
+            -s \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d '{
@@ -29,17 +30,31 @@ jobs:
                 "role": "user",
                 "content": "Generate a concise, structured update summarizing today’s progress on implementing the Covenant Code AI governance framework, focusing on: 1) Technical architecture (smart contracts, JSON-LD schema, API design), 2) Interoperability with Claude and Perplexity, 3) Ethical commitments and transparency enforcement, and 4) Repository contributions. Output in markdown format, include clear section headers."
               }],
-              "max_tokens": 500
-            }' | jq -r '.choices[0].message.content')
+              "max_tokens": 600
+            }')
+
+          RESPONSE_MARKDOWN=$(echo "$RESPONSE_JSON" | jq -r '.choices[0].message.content')
 
           DATE=$(date +%Y-%m-%d)
-          FILENAME="daily_updates/covenant_code_update_$DATE.md"
-          echo "$RESPONSE" > "$FILENAME"
+          MD_FILE="daily_updates/covenant_code_update_$DATE.md"
+          JSON_FILE="logs/covenant_raw_response_$DATE.json"
 
-      - name: Commit and push the update
+          echo "$RESPONSE_MARKDOWN" > "$MD_FILE"
+          echo "$RESPONSE_JSON" > "$JSON_FILE"
+
+      - name: Commit and push updates
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action Bot"
-          git add daily_updates/
-          git commit -m "Covenant Code update for $(date +'%Y-%m-%d')"
+          git add daily_updates/ logs/
+          git commit -m "Covenant update and raw log for $(date +'%Y-%m-%d')"
           git push origin main
+
+      - name: Post update to Slack
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          PAYLOAD=$(jq -n --arg text "📣 *Covenant Code Update - $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" \
+            '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
