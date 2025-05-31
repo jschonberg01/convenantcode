@@ -1,4 +1,4 @@
-name: Covenant Code Daily Update + Slack + JSON Log
+name: Covenant Code Daily Update with Slack + JSON Log
 
 on:
   workflow_dispatch:  # Manual trigger
@@ -42,19 +42,25 @@ jobs:
           echo "$RESPONSE_MARKDOWN" > "$MD_FILE"
           echo "$RESPONSE_JSON" > "$JSON_FILE"
 
-      - name: Commit and push updates
+      - name: Commit and push updates (only if changes exist)
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action Bot"
+
           git add daily_updates/ logs/
-          git commit -m "Covenant update and raw log for $(date +'%Y-%m-%d')"
-          git push origin main
+
+          if git diff --cached --quiet; then
+            echo "⚠️ No changes to commit. Skipping push."
+          else
+            git commit -m "Covenant Code update and raw log for $(date +'%Y-%m-%d')"
+            git push origin main
+          fi
 
       - name: Post update to Slack
         if: env.SLACK_WEBHOOK_URL != ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          PAYLOAD=$(jq -n --arg text "📣 *Covenant Code Update - $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" \
+          PAYLOAD=$(jq -n --arg text "📣 *Covenant Code Update – $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" \
             '{text: $text}')
           curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
