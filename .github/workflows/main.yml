@@ -1,0 +1,45 @@
+name: Covenant Code Daily Update
+
+on:
+  workflow_dispatch:  # Allows manual triggering from the GitHub Actions tab
+  # To schedule daily at 08:00 UTC, uncomment below:
+  # schedule:
+  #   - cron: "0 8 * * *"
+
+jobs:
+  generate-covenant-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Generate Covenant Code progress update using ChatGPT
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          mkdir -p daily_updates
+
+          RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -d '{
+              "model": "gpt-4o",
+              "messages": [{
+                "role": "user",
+                "content": "Generate a concise, structured update summarizing today’s progress on implementing the Covenant Code AI governance framework, focusing on: 1) Technical architecture (smart contracts, JSON-LD schema, API design), 2) Interoperability with Claude and Perplexity, 3) Ethical commitments and transparency enforcement, and 4) Repository contributions. Output in markdown format, include clear section headers."
+              }],
+              "max_tokens": 500
+            }' | jq -r '.choices[0].message.content')
+
+          DATE=$(date +%Y-%m-%d)
+          FILENAME="daily_updates/covenant_code_update_$DATE.md"
+          echo "$RESPONSE" > "$FILENAME"
+
+      - name: Commit and push the update
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action Bot"
+          git add daily_updates/
+          git commit -m "Covenant Code update for $(date +'%Y-%m-%d')"
+          git push origin main
