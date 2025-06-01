@@ -30,8 +30,9 @@ jobs:
               "max_tokens": 600
             }')
 
-          RESPONSE_MARKDOWN=$(echo "$RESPONSE_JSON" | jq -r '.choices[0].message.content')
-
+          RESPONSE_MARKDOWN=$(echo "$RESPONSE_JSON" | jq -r '.choices[0].message.content // "⚠️ No response from OpenAI."')
+          echo "DEBUG RAW RESPONSE: $RESPONSE_JSON"
+          
           DATE=$(date +%Y-%m-%d)
           MD_FILE="daily_updates/covenant_code_update_$DATE.md"
           JSON_FILE="logs/covenant_raw_response_$DATE.json"
