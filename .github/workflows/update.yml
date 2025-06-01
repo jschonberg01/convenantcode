@@ -49,7 +49,7 @@ jobs:
 
           git add daily_updates/ logs/
           if git diff --cached --quiet; then
-            echo "🔶 No changes to commit. Skipping push."
+            echo "No changes to commit."
           else
             git commit -m "Covenant Code update and raw log for $(date +'%Y-%m-%d')"
             git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
@@ -58,3 +58,8 @@ jobs:
 
       - name: Post update to Slack
         if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
