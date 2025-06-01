@@ -37,4 +37,29 @@ jobs:
           MD_FILE="daily_updates/covenant_code_update_$DATE.md"
           JSON_FILE="logs/covenant_raw_response_$DATE.json"
 
-          echo "$RESPONSE_MARKDOWN"_
+          echo "$RESPONSE_MARKDOWN"
+          
+    - name: Commit and push updates (only if changes exist)
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action Bot"
+
+        git add daily_updates/ logs/
+        if git diff --cached --quiet; then
+          echo "🔁 No changes to commit. Skipping push."
+        else
+          git commit -m "Covenant Code update and raw log for $(date +'%Y-%m-%d')"
+          git push origin main
+        fi
+
+    - name: Post update to Slack
+      if: env.SLACK_WEBHOOK_URL != ''
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        PAYLOAD=$(jq -n --arg text "*📜 Covenant Code Update $(date +'%Y-%m-%d')*\n\n${RESPONSE_MARKDOWN}" \
+          '{text: $text}')
+        curl -X POST -H 'Content-type: application/json' \
+          --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
+
