@@ -25,7 +25,7 @@ jobs:
               "model": "gpt-4o",
               "messages": [{
                 "role": "user",
-                "content": "Generate a test message for todays Covenant Code workflow run. Say Hello world."
+                "content": "Generate a Markdown-formatted daily update for the Covenant Code GitHub project, summarizing current progress and next steps. Include a header, a bullet list, and an inspirational quote about ethics or trust in AI."
               }],
               "max_tokens": 600
             }')
