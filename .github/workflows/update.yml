@@ -26,8 +26,8 @@ jobs:
               "model": "gpt-4o",
               "messages": [{
                 "role": "user",
-                "content": "Generate a concise, structured update summarizing today’s progress on implementing the Covenant Code AI governance framework, focusing on: 1) Technical architecture (smart contracts, JSON-LD schema, API design), 2) Interoperability with Claude and Perplexity, 3) Ethical commitments and transparency enforcement, and 4) Repository contributions. Output in markdown format, include clear section headers."
-              }],
+                "content": "Generate a test message for today's Covenant Code workflow run. Say 'Hello world'."
+                }],
               "max_tokens": 600
             }')
 
