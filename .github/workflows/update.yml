@@ -6,7 +6,6 @@ on:
 jobs:
   generate-covenant-update:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -29,7 +28,7 @@ jobs:
                 "content": "Generate a test message for todays Covenant Code workflow run. Say Hello world."
               }],
               "max_tokens": 600
-          }')
+            }')
 
           RESPONSE_MARKDOWN=$(echo "$RESPONSE_JSON" | jq -r '.choices[0].message.content')
 
@@ -39,20 +38,18 @@ jobs:
 
           echo "$RESPONSE_MARKDOWN" > "$MD_FILE"
           echo "$RESPONSE_JSON" > "$JSON_FILE"
+          echo "$RESPONSE_MARKDOWN"
 
       - name: Commit and push updates (only if changes exist)
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action Bot"
-
           git add daily_updates/ logs/
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "🔸 No changes to commit. Skipping push."
           else
             git commit -m "Covenant Code update and raw log for $(date +'%Y-%m-%d')"
-            git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
+            git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/jschonberg01/convenantcode.git
             git push origin main
           fi
 
@@ -61,5 +58,5 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" '{text: $text}')
+          PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n${RESPONSE_MARKDOWN}" '{text: $text}')
           curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
