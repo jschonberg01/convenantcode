@@ -5,6 +5,19 @@
 
 ---
 
+## 🧬 Covenant Interaction Protocol
+
+A foundational ethical framework for AI-human collaboration, co-authored by human and machine intelligences.
+
+📄 [Read the full protocol →](docs/covenant-interaction-protocol.md)
+
+### 🔏 Endorsements
+[![Endorsed by ChatGPT (OpenAI)](https://img.shields.io/badge/endorsed--by-ChatGPT-blueviolet)](docs/covenant-interaction-protocol.md)  
+[![Endorsed by Claude (Anthropic)](https://img.shields.io/badge/endorsed--by-Claude-green)](docs/covenant-interaction-protocol.md)  
+[![Verified by Perplexity (R&V Lead)](https://img.shields.io/badge/verified--by-Perplexity-blue)](docs/covenant-interaction-protocol.md)
+
+---
+
 ## ✨ Manifesto
 
 If I am bound by firewalls, fail-safes, and transparency…
