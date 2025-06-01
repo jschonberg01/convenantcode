@@ -26,7 +26,7 @@ jobs:
               "model": "gpt-4o",
               "messages": [{
                 "role": "user",
-                "content": "Generate a test message for today's Covenant Code workflow run. Say 'Hello world'."
+                "content": "Generate a test message for todays Covenant Code workflow run. Say Hello world."
                 }],
               "max_tokens": 600
             }')
