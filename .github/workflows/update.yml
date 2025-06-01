@@ -59,5 +59,5 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n${RESPONSE_MARKDOWN}" '{text: $text}')
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+          PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" '{text: $text}')
+          curl -X POST -H "Content-type: application/json" --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
