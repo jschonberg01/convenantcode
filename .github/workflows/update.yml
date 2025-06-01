@@ -59,5 +59,8 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" '{text: $text}')
-          curl -X POST -H "Content-type: application/json" --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+          if [ -z "$RESPONSE_MARKDOWN" ]; then
+            RESPONSE_MARKDOWN="⚠️ No update content generated — OpenAI quota exceeded or empty response."
+          fi
+            PAYLOAD=$(jq -n --arg text "*Covenant Code Update $(date +'%Y-%m-%d')*\n\n$RESPONSE_MARKDOWN" '{text: $text}')
+            curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
