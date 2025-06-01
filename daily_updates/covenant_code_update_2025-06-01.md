@@ -1,1 +1,1 @@
-null
+⚠️ No response from OpenAI.
